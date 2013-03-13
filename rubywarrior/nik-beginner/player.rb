@@ -4,16 +4,16 @@ class Player
     @health ||= warrior.health
     dont_rest = warrior.health < @health
     if warrior.feel.enemy?
-#      if warrior.health < 5
-#        warrior.walk!(:backward)
-#      else
-        warrior.attack!
-#      end
+      warrior.attack!
     else
       if warrior.health != 20 and !dont_rest
         warrior.rest!
       else
-        warrior.walk!
+        if warrior.feel.captive?
+          warrior.rescue!
+        else
+          warrior.walk!
+        end
       end
     end
     @health = warrior.health
