@@ -20,10 +20,14 @@ class Player
         if warrior.captive_to_rescue?
           warrior.rescue!(warrior.captive_to_rescue?)
         else
-          if !@toccato_il_muro
-            warrior.walk!(:backward)
+          if warrior.feel.wall?
+            warrior.pivot!
           else
-            warrior.walk!
+            if !@toccato_il_muro
+              warrior.walk!(:backward)
+            else
+              warrior.walk!
+            end
           end
         end
       end
