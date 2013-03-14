@@ -29,33 +29,17 @@ class Player
         dir,pos = warrior.see_archer?
         warrior.shoot!(dir)
       else
-        if warrior.where_enemy?
-          dir,pos = warrior.where_enemy?
-          case pos
-          when 0
-            if warrior.health < 15 and !dont_rest
-              warrior.walk!(warrior.inverse_of(dir))
-            else
-              warrior.attack!(dir)
-            end
-          when 1,2
-            warrior.shoot!(dir)
-          end
+        if warrior.health != 20
+          warrior.rest!
         else
-          if warrior.health != 20 and !dont_rest
-            warrior.rest!
-          elsif warrior.health < 15
-            warrior.walk!(:backward)
+          if warrior.captive_to_rescue?
+            warrior.rescue!(warrior.captive_to_rescue?)
           else
-            if warrior.captive_to_rescue?
-              warrior.rescue!(warrior.captive_to_rescue?)
-            else
-              #if warrior.feel.wall?
-              #  warrior.pivot!
-              #else
-              warrior.walk!(warrior.where_walk?)
-              #end
-            end
+            #if warrior.feel.wall?
+            #  warrior.pivot!
+            #else
+            warrior.walk!(warrior.where_walk?)
+            #end
           end
         end
       end
@@ -105,6 +89,7 @@ class RubyWarrior::Turn
     end
   end
   def captive_to_save?
+    return nil if self.health < 8
     self.listen.each do |space|
       if space.ticking?
         if self.feel(self.direction_of(space)).enemy?
