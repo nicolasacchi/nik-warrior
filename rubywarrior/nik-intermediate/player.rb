@@ -50,11 +50,7 @@ class Player
               #if warrior.feel.wall?
               #  warrior.pivot!
               #else
-                if !@toccato_il_muro
-                  warrior.walk!(:backward)
-                else
-                  warrior.walk!(warrior.where_walk?)
-                end
+              warrior.walk!(warrior.where_walk?)
               #end
             end
           end
@@ -80,7 +76,12 @@ class RubyWarrior::Turn
     [:forward, :backward, :right, :left]
   end
   def where_walk?
-    return self.direction_of_stairs
+    list = self.listen
+    if list.length > 0
+      return self.direction_of(list[0])
+    else
+      return self.direction_of_stairs
+    end
     directions[rand(0..3)]
   end
   def captive_to_rescue?
