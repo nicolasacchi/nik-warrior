@@ -10,6 +10,9 @@ class Player
     if warrior.captive_to_save?
       if warrior.feel(warrior.direction_of(warrior.captive_to_save?)).captive?
         warrior.rescue!(warrior.direction_of(warrior.captive_to_save?))
+      elsif warrior.feel(warrior.direction_of(warrior.captive_to_save?)).enemy?
+        warrior.attacca!(:dir => warrior.direction_of(warrior.captive_to_save?),
+                        :dont_rest => dont_rest)
       else
         warrior.walk!(warrior.direction_of(warrior.captive_to_save?))
       end
@@ -17,13 +20,7 @@ class Player
       dir,pos = warrior.where_enemy?
       case pos
         when 0
-          if warrior.n_enemy_vicini > 1
-            warrior.bind!(dir)
-          elsif warrior.health < 15 and !dont_rest
-            warrior.walk!(inverse_of(dir))
-          else
-            warrior.attack!(dir)
-          end
+          warrior.attacca!(:dir => dir, :dont_rest => dont_rest)
         when 1,2
           warrior.shoot!(dir)
       end
@@ -81,6 +78,18 @@ class RubyWarrior::Turn
   def directions
     [:forward, :backward, :right, :left]
   end
+  def attacca!(opts = {})
+    dir = opts[:dir]
+    dont_rest = opts[:dont_rest]
+    if self.n_enemy_vicini > 1
+      dir,pos = self.where_enemy?(directions - [dir])
+      self.bind!(dir)
+    elsif self.health < 15 and !dont_rest
+      self.walk!(inverse_of(dir))
+    else
+      self.attack!(dir)
+    end
+  end
   def captive_to_save?
     self.listen.each do |space|
       if space.ticking?
@@ -113,9 +122,10 @@ class RubyWarrior::Turn
     end
     return false
   end
-  def where_enemy?
+  def where_enemy?(dirs = nil)
+    dirs ||= directions
     (0..(self.look(:forward).length - 1)).each do |pos|
-      directions.each do |dir|
+      dirs.each do |dir|
         if self.look(dir)[pos].enemy?
           return dir,pos
         end
