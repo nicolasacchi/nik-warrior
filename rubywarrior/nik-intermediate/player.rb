@@ -78,11 +78,16 @@ class RubyWarrior::Turn
   def where_walk?
     list = self.listen
     if list.length > 0
-      return self.direction_of(list[0])
+      if self.feel(self.direction_of(list[0])).stairs?
+        dirs = directions
+        dirs.delete(self.direction_of(list[0]))
+        return dirs[rand(0..2)]
+      else
+        return self.direction_of(list[0])
+      end
     else
       return self.direction_of_stairs
     end
-    directions[rand(0..3)]
   end
   def captive_to_rescue?
     directions.each do |dir|
