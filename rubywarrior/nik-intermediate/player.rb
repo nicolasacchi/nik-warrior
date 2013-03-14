@@ -5,9 +5,9 @@ class Player
     @toccato_il_muro ||= false
     @toccato_il_muro = true if warrior.feel(:backward).wall?
     dont_rest = warrior.health < @health
-#p warrior.look[1].to_s
-
-    if warrior.captive_to_save?
+    @n_enemy ||= warrior.n_enemy
+    if warrior.captive_to_save? and 
+      (warrior.health > 8 or @n_enemy < 3)
       if warrior.feel(warrior.direction_of(warrior.captive_to_save?)).captive?
         warrior.rescue!(warrior.direction_of(warrior.captive_to_save?))
       elsif warrior.feel(warrior.direction_of(warrior.captive_to_save?)).enemy?
@@ -89,7 +89,6 @@ class RubyWarrior::Turn
     end
   end
   def captive_to_save?
-    return nil if self.health < 8
     self.listen.each do |space|
       if space.ticking?
         if self.feel(self.direction_of(space)).enemy?
@@ -151,6 +150,18 @@ class RubyWarrior::Turn
     directions.each do |dir|
       if self.look(dir)[0].enemy?
         num += 1
+      end
+    end
+    return num
+  end
+  def n_enemy(dirs = nil)
+    dirs ||= directions
+    num = 0
+    (0..(self.look(:forward).length - 1)).each do |pos|
+      dirs.each do |dir|
+        if self.look(dir)[pos].enemy?
+          num += 1
+        end
       end
     end
     return num
