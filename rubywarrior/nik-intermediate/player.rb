@@ -7,7 +7,13 @@ class Player
     dont_rest = warrior.health < @health
 #p warrior.look[1].to_s
 
-    if warrior.enemy_vicini?
+    if warrior.captive_to_save?
+      if warrior.feel(warrior.direction_of(warrior.captive_to_save?)).captive?
+        warrior.rescue!(warrior.direction_of(warrior.captive_to_save?))
+      else
+        warrior.walk!(warrior.direction_of(warrior.captive_to_save?))
+      end
+    elsif warrior.enemy_vicini?
       dir,pos = warrior.where_enemy?
       case pos
         when 0
@@ -74,6 +80,18 @@ class RubyWarrior::Turn
   end
   def directions
     [:forward, :backward, :right, :left]
+  end
+  def captive_to_save?
+    self.listen.each do |space|
+      if space.ticking?
+        if self.feel(self.direction_of(space)).enemy?
+          return nil
+        else
+          return space
+        end
+      end
+    end
+    return nil
   end
   def where_walk?
     list = self.listen
