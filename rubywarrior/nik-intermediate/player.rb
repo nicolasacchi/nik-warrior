@@ -34,7 +34,7 @@ class Player
           case pos
           when 0
             if warrior.health < 15 and !dont_rest
-              warrior.walk!(inverse_of(dir))
+              warrior.walk!(warrior.inverse_of(dir))
             else
               warrior.attack!(dir)
             end
@@ -62,21 +62,33 @@ class Player
     end
     @health = warrior.health
   end
+end
+class RubyWarrior::Turn
+  def directions
+    [:forward, :backward, :right, :left]
+  end
   def inverse_of(dir)
     case dir
     when :backward
       return :forward
     when :forward
       return :backward
+    when :left
+      return :right
+    when :right
+      return :left
     end
   end
-end
-class RubyWarrior::Turn
-  def look(dir)
-    return [self.feel(dir)]
-  end
-  def directions
-    [:forward, :backward, :right, :left]
+  def drop_bomb?(dir)
+    num = 0
+    self.look(dir).each do |space|
+      num += 1 if space.enemy?
+    end
+    if num > 1 and self.health > 4
+      return true
+    else
+      return false
+    end
   end
   def attacca!(opts = {})
     dir = opts[:dir]
@@ -86,6 +98,8 @@ class RubyWarrior::Turn
       self.bind!(dir)
     elsif self.health < 15 and !dont_rest
       self.walk!(inverse_of(dir))
+    elsif self.drop_bomb?(dir)
+      self.detonate!(dir)
     else
       self.attack!(dir)
     end
