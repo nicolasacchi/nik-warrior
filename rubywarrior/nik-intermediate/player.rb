@@ -11,7 +11,9 @@ class Player
       dir,pos = warrior.where_enemy?
       case pos
         when 0
-          if warrior.health < 15 and !dont_rest
+          if warrior.n_enemy_vicini > 1
+            warrior.bind!(dir)
+          elsif warrior.health < 15 and !dont_rest
             warrior.walk!(inverse_of(dir))
           else
             warrior.attack!(dir)
@@ -78,7 +80,8 @@ class RubyWarrior::Turn
     [:forward, :backward, :right, :left]
   end
   def where_walk?
-    directions[rand(3)]
+    return self.direction_of_stairs
+    directions[rand(0..3)]
   end
   def captive_to_rescue?
     directions.each do |dir|
@@ -88,7 +91,7 @@ class RubyWarrior::Turn
   end
   def where_enemy?
     (0..(self.look(:forward).length - 1)).each do |pos|
-      [:forward, :backward].each do |dir|
+      directions.each do |dir|
         if self.look(dir)[pos].enemy?
           return dir,pos
         end
@@ -98,7 +101,7 @@ class RubyWarrior::Turn
   end
   def see_archer?
     (0..(self.look(:forward).length - 1)).each do |pos|
-      [:forward, :backward].each do |dir|
+      directions.each do |dir|
         if self.look(dir)[pos].to_s == "Archer"
           return dir,pos
         end
@@ -109,5 +112,14 @@ class RubyWarrior::Turn
   def enemy_vicini?
     dir,pos = self.where_enemy?
     return pos == 0
+  end
+  def n_enemy_vicini
+    num = 0
+    directions.each do |dir|
+      if self.look(dir)[0].enemy?
+        num += 1
+      end
+    end
+    return num
   end
 end
