@@ -71,9 +71,6 @@ class Player
   end
 end
 class RubyWarrior::Turn
-  def health
-    20
-  end
   def look(dir)
     return [self.feel(dir)]
   end
